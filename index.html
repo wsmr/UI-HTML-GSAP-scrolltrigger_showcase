@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GSAP ScrollTrigger Showcase</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #000;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        /* Navigation */
+        .nav {
+            position: fixed;
+            right: 40px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .nav-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .nav-dot:hover {
+            background: rgba(255, 255, 255, 0.6);
+            transform: scale(1.2);
+        }
+
+        .nav-dot.active {
+            background: #fff;
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: scale(1.3);
+        }
+
+        /* Scroll Progress */
+        .scroll-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2, #f093fb);
+            z-index: 1001;
+        }
+
+        /* Hero Section */
+        .hero {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-content {
+            text-align: center;
+            z-index: 2;
+        }
+
+        .hero-title {
+            font-size: clamp(3rem, 8vw, 7rem);
+            font-weight: 900;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+            line-height: 1.1;
+        }
+
+        .hero-subtitle {
+            font-size: clamp(1rem, 2vw, 1.5rem);
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 2rem;
+        }
+
+        .hero-scroll {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.5);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* Stars background */
+        .stars {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+        }
+
+        /* Section Base */
+        .section {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .section-title {
+            font-size: clamp(2rem, 5vw, 4rem);
+            font-weight: 800;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .section-desc {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.6);
+            text-align: center;
+            max-width: 600px;
+            margin: 0 auto 2rem;
+        }
+
+        /* Fade In Section */
+        .fade-section {
+            background: linear-gradient(180deg, #000 0%, #1a1a2e 100%);
+            padding: 100px 20px;
+        }
+
+        .fade-box {
+            max-width: 400px;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin: 20px;
+            opacity: 0;
+        }
+
+        .fade-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Horizontal Scroll Section */
+        .horizontal-section {
+            height: 100vh;
+            overflow: hidden;
+            background: #000;
+        }
+
+        .horizontal-wrap {
+            display: flex;
+            height: 100vh;
+        }
+
+        .horizontal-panel {
+            min-width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 40px;
+            position: relative;
+        }
+
+        .panel-1 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .panel-2 { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .panel-3 { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .panel-4 { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+        .panel-5 { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+
+        /* Parallax Section */
+        .parallax-section {
+            height: 200vh;
+            background: #0f0f0f;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .parallax-layer {
+            position: absolute;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .parallax-item {
+            width: 200px;
+            height: 200px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: absolute;
+        }
+
+        /* Pin & Rotate Section */
+        .rotate-section {
+            height: 100vh;
+            background: #1a1a1a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .rotate-box {
+            width: 300px;
+            height: 300px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        /* Text Reveal Section */
+        .text-reveal-section {
+            min-height: 100vh;
+            background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 100px 20px;
+        }
+
+        .reveal-text {
+            font-size: clamp(2rem, 5vw, 5rem);
+            font-weight: 900;
+            text-align: center;
+            line-height: 1.3;
+            max-width: 1200px;
+        }
+
+        .reveal-word {
+            display: inline-block;
+            opacity: 0.1;
+            margin: 0 10px;
+        }
+
+        /* Scale Section */
+        .scale-section {
+            height: 100vh;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .scale-card {
+            width: 400px;
+            height: 500px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+            position: absolute;
+        }
+
+        /* Stagger Section */
+        .stagger-section {
+            min-height: 100vh;
+            background: linear-gradient(180deg, #16213e 0%, #0f3460 100%);
+            padding: 100px 20px;
+        }
+
+        .stagger-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .stagger-item {
+            aspect-ratio: 1;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+            opacity: 0;
+            transform: translateY(50px);
+        }
+
+        /* Image Reveal Section */
+        .image-reveal-section {
+            height: 100vh;
+            background: #1a1a1a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .image-container {
+            width: 80%;
+            max-width: 800px;
+            aspect-ratio: 16/9;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .image-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            transform-origin: left;
+        }
+
+        /* Counter Section */
+        .counter-section {
+            min-height: 100vh;
+            background: linear-gradient(180deg, #0f3460 0%, #16213e 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 100px 20px;
+        }
+
+        .counter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .counter-item {
+            text-align: center;
+        }
+
+        .counter-number {
+            font-size: 4rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .counter-label {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-top: 10px;
+        }
+
+        /* Footer */
+        .footer {
+            min-height: 50vh;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .footer-title {
+            font-size: 3rem;
+            font-weight: 900;
+            text-align: center;
+        }
+
+        .footer-text {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav {
+                right: 20px;
+            }
+
+            .fade-grid,
+            .stagger-grid,
+            .counter-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Scroll Progress Bar -->
+    <div class="scroll-progress"></div>
+
+    <!-- Navigation Dots -->
+    <div class="nav">
+        <div class="nav-dot active" data-section="0"></div>
+        <div class="nav-dot" data-section="1"></div>
+        <div class="nav-dot" data-section="2"></div>
+        <div class="nav-dot" data-section="3"></div>
+        <div class="nav-dot" data-section="4"></div>
+        <div class="nav-dot" data-section="5"></div>
+        <div class="nav-dot" data-section="6"></div>
+        <div class="nav-dot" data-section="7"></div>
+        <div class="nav-dot" data-section="8"></div>
+        <div class="nav-dot" data-section="9"></div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero section" data-section="0">
+        <div class="stars"></div>
+        <div class="hero-content">
+            <h1 class="hero-title">ScrollTrigger<br>Showcase</h1>
+            <p class="hero-subtitle">Explore 10 powerful scroll animation techniques</p>
+            <p class="hero-scroll">↓ Scroll to explore ↓</p>
+        </div>
+    </section>
+
+    <!-- 1. Fade In Section -->
+    <section class="fade-section section" data-section="1">
+        <div style="width: 100%;">
+            <h2 class="section-title">Fade In on Scroll</h2>
+            <p class="section-desc">Elements fade in as you scroll down</p>
+            <div class="fade-grid">
+                <div class="fade-box">
+                    <h3 style="margin-bottom: 10px;">Card 1</h3>
+                    <p style="color: rgba(255,255,255,0.6);">Smooth fade-in animation</p>
+                </div>
+                <div class="fade-box">
+                    <h3 style="margin-bottom: 10px;">Card 2</h3>
+                    <p style="color: rgba(255,255,255,0.6);">Perfect for content reveal</p>
+                </div>
+                <div class="fade-box">
+                    <h3 style="margin-bottom: 10px;">Card 3</h3>
+                    <p style="color: rgba(255,255,255,0.6);">Enhance user experience</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 2. Horizontal Scroll -->
+    <section class="horizontal-section section" data-section="2">
+        <div class="horizontal-wrap">
+            <div class="horizontal-panel panel-1">
+                <h2 style="font-size: 4rem;">Panel 1</h2>
+                <p style="margin-top: 20px; opacity: 0.8;">Horizontal scroll pinning</p>
+            </div>
+            <div class="horizontal-panel panel-2">
+                <h2 style="font-size: 4rem;">Panel 2</h2>
+                <p style="margin-top: 20px; opacity: 0.8;">Perfect for showcases</p>
+            </div>
+            <div class="horizontal-panel panel-3">
+                <h2 style="font-size: 4rem;">Panel 3</h2>
+                <p style="margin-top: 20px; opacity: 0.8;">Apple-style presentations</p>
+            </div>
+            <div class="horizontal-panel panel-4">
+                <h2 style="font-size: 4rem;">Panel 4</h2>
+                <p style="margin-top: 20px; opacity: 0.8;">Smooth transitions</p>
+            </div>
+            <div class="horizontal-panel panel-5">
+                <h2 style="font-size: 4rem;">Panel 5</h2>
+                <p style="margin-top: 20px; opacity: 0.8;">Keep scrolling!</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3. Parallax Section -->
+    <section class="parallax-section section" data-section="3">
+        <div class="parallax-layer">
+            <h2 class="section-title" style="position: absolute; top: 50px; width: 100%;">Parallax Effect</h2>
+            <div class="parallax-item" style="left: 10%; top: 20%;"></div>
+            <div class="parallax-item" style="right: 10%; top: 30%;"></div>
+            <div class="parallax-item" style="left: 20%; bottom: 20%;"></div>
+            <div class="parallax-item" style="right: 20%; bottom: 30%;"></div>
+        </div>
+    </section>
+
+    <!-- 4. Pin & Rotate -->
+    <section class="rotate-section section" data-section="4">
+        <h2 class="section-title" style="position: absolute; top: 50px; width: 100%;">Pin & Rotate</h2>
+        <div class="rotate-box">360°</div>
+    </section>
+
+    <!-- 5. Text Reveal -->
+    <section class="text-reveal-section section" data-section="5">
+        <div class="reveal-text">
+            <span class="reveal-word">Create</span>
+            <span class="reveal-word">stunning</span>
+            <span class="reveal-word">scroll</span>
+            <span class="reveal-word">experiences</span>
+            <span class="reveal-word">with</span>
+            <span class="reveal-word">GSAP</span>
+            <span class="reveal-word">ScrollTrigger</span>
+        </div>
+    </section>
+
+    <!-- 6. Scale Effect -->
+    <section class="scale-section section" data-section="6">
+        <h2 class="section-title" style="position: absolute; top: 50px; width: 100%;">Scale on Scroll</h2>
+        <div class="scale-card">Scale Up</div>
+    </section>
+
+    <!-- 7. Stagger Animation -->
+    <section class="stagger-section section" data-section="7">
+        <div style="width: 100%;">
+            <h2 class="section-title">Stagger Animation</h2>
+            <p class="section-desc">Items animate in sequence</p>
+            <div class="stagger-grid">
+                <div class="stagger-item">1</div>
+                <div class="stagger-item">2</div>
+                <div class="stagger-item">3</div>
+                <div class="stagger-item">4</div>
+                <div class="stagger-item">5</div>
+                <div class="stagger-item">6</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 8. Image Reveal -->
+    <section class="image-reveal-section section" data-section="8">
+        <h2 class="section-title" style="position: absolute; top: 50px; width: 100%;">Image Reveal</h2>
+        <div class="image-container">
+            <div class="image-overlay"></div>
+        </div>
+    </section>
+
+    <!-- 9. Counter Animation -->
+    <section class="counter-section section" data-section="9">
+        <div style="width: 100%;">
+            <h2 class="section-title">Counter Animation</h2>
+            <p class="section-desc">Numbers count up on scroll</p>
+            <div class="counter-grid">
+                <div class="counter-item">
+                    <div class="counter-number" data-target="500">0</div>
+                    <div class="counter-label">Projects</div>
+                </div>
+                <div class="counter-item">
+                    <div class="counter-number" data-target="1000">0</div>
+                    <div class="counter-label">Clients</div>
+                </div>
+                <div class="counter-item">
+                    <div class="counter-number" data-target="99">0</div>
+                    <div class="counter-label">Awards</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <section class="footer">
+        <h2 class="footer-title">Ready to Build?</h2>
+        <p class="footer-text">Use these techniques in your next project</p>
+    </section>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script>
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Scroll Progress Bar
+        gsap.to(".scroll-progress", {
+            width: "100%",
+            ease: "none",
+            scrollTrigger: {
+                trigger: "body",
+                start: "top top",
+                end: "bottom bottom",
+                scrub: 0.3
+            }
+        });
+
+        // Navigation Dots
+        const sections = gsap.utils.toArray(".section");
+        const navDots = gsap.utils.toArray(".nav-dot");
+
+        sections.forEach((section, i) => {
+            ScrollTrigger.create({
+                trigger: section,
+                start: "top center",
+                end: "bottom center",
+                onToggle: self => {
+                    if (self.isActive) {
+                        navDots.forEach(dot => dot.classList.remove("active"));
+                        navDots[i].classList.add("active");
+                    }
+                }
+            });
+        });
+
+        navDots.forEach(dot => {
+            dot.addEventListener("click", () => {
+                const index = dot.getAttribute("data-section");
+                sections[index].scrollIntoView({ behavior: "smooth" });
+            });
+        });
+
+        // Hero Stars
+        const starsContainer = document.querySelector(".stars");
+        for (let i = 0; i < 100; i++) {
+            const star = document.createElement("div");
+            star.className = "star";
+            star.style.left = Math.random() * 100 + "%";
+            star.style.top = Math.random() * 100 + "%";
+            star.style.animationDelay = Math.random() * 2 + "s";
+            starsContainer.appendChild(star);
+        }
+
+        // Hero Animations
+        gsap.from(".hero-title", {
+            y: 100,
+            opacity: 0,
+            duration: 1,
+            delay: 0.3
+        });
+
+        gsap.from(".hero-subtitle", {
+            y: 50,
+            opacity: 0,
+            duration: 1,
+            delay: 0.6
+        });
+
+        gsap.from(".hero-scroll", {
+            y: 30,
+            opacity: 0,
+            duration: 1,
+            delay: 0.9
+        });
+
+        // 1. Fade In Boxes
+        gsap.utils.toArray(".fade-box").forEach((box, i) => {
+            gsap.from(box, {
+                opacity: 0,
+                y: 100,
+                duration: 1,
+                scrollTrigger: {
+                    trigger: box,
+                    start: "top 80%",
+                    toggleActions: "play none none reverse"
+                }
+            });
+        });
+
+        // 2. Horizontal Scroll
+        const panels = gsap.utils.toArray(".horizontal-panel");
+        gsap.to(panels, {
+            xPercent: -100 * (panels.length - 1),
+            ease: "none",
+            scrollTrigger: {
+                trigger: ".horizontal-section",
+                pin: true,
+                scrub: 1,
+                snap: 1 / (panels.length - 1),
+                end: () => "+=" + document.querySelector(".horizontal-wrap").offsetWidth
+            }
+        });
+
+        // 3. Parallax Items
+        gsap.utils.toArray(".parallax-item").forEach((item, i) => {
+            const speed = (i + 1) * 0.5;
+            gsap.to(item, {
+                y: () => -ScrollTrigger.maxScroll(window) * speed * 0.1,
+                ease: "none",
+                scrollTrigger: {
+                    trigger: ".parallax-section",
+                    start: "top bottom",
+                    end: "bottom top",
+                    scrub: true
+                }
+            });
+        });
+
+        // 4. Rotate Box
+        gsap.to(".rotate-box", {
+            rotation: 360,
+            scale: 1.5,
+            scrollTrigger: {
+                trigger: ".rotate-section",
+                pin: true,
+                scrub: 1,
+                start: "top top",
+                end: "+=100%"
+            }
+        });
+
+        // 5. Text Reveal
+        gsap.utils.toArray(".reveal-word").forEach((word, i) => {
+            gsap.to(word, {
+                opacity: 1,
+                scrollTrigger: {
+                    trigger: ".text-reveal-section",
+                    start: "top center",
+                    end: "bottom center",
+                    scrub: 1,
+                    toggleActions: "play none none reverse"
+                },
+                ease: "none",
+                delay: i * 0.1
+            });
+        });
+
+        // 6. Scale Card
+        gsap.fromTo(".scale-card", 
+            { scale: 0.5, opacity: 0 },
+            { 
+                scale: 1, 
+                opacity: 1,
+                scrollTrigger: {
+                    trigger: ".scale-section",
+                    pin: true,
+                    scrub: 1,
+                    start: "top top",
+                    end: "+=100%"
+                }
+            }
+        );
+
+        // 7. Stagger Items
+        gsap.from(".stagger-item", {
+            opacity: 0,
+            y: 100,
+            stagger: 0.2,
+            duration: 1,
+            scrollTrigger: {
+                trigger: ".stagger-section",
+                start: "top 70%",
+                toggleActions: "play none none reverse"
+            }
+        });
+
+        // 8. Image Reveal
+        gsap.to(".image-overlay", {
+            scaleX: 0,
+            duration: 1,
+            scrollTrigger: {
+                trigger: ".image-reveal-section",
+                start: "top center",
+                toggleActions: "play none none reverse"
+            }
+        });
+
+        // 9. Counter Animation
+        gsap.utils.toArray(".counter-number").forEach(counter => {
+            const target = parseInt(counter.getAttribute("data-target"));
+            gsap.to(counter, {
+                innerText: target,
+                duration: 2,
+                snap: { innerText: 1 },
+                scrollTrigger: {
+                    trigger: counter,
+                    start: "top 80%",
+                    toggleActions: "play none none reverse"
+                },
+                onUpdate: function() {
+                    counter.innerText = Math.ceil(counter.innerText);
+                }
+            });
+        });
+
+        // Star twinkle animation
+        gsap.to(".star", {
+            opacity: Math.random(),
+            duration: 2,
+            repeat: -1,
+            yoyo: true,
+            ease: "power1.inOut",
+            stagger: {
+                amount: 2,
+                from: "random"
+            }
+        });
+    </script>
+</body>
+</html>
